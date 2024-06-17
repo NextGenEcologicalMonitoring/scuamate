@@ -12,10 +12,9 @@ from scuamate import (get_request,
                       get_prev_utc_datetime,
                       get_dotenv_vals,
                       InvalidPointsError,
-                      KeyVaultError,
                       GetRequestError,
                      )
-from scuamate.az.keyvault import get_secret
+from scuamate.az.keyvault import get_secret, KeyVaultError
 
 ##########
 # FN DEFS:
