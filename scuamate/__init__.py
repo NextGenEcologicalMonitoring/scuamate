@@ -7,9 +7,8 @@ A Python package containing utilities to help run, maintain, check, and back
 up the cloud infrastructure for next-generation wildlife monitoring projects
 (originally develope at CSIRO for SpaceCows and the National Koala Monitoring Program)
 '''
-
 from .core import *
 from . import az
 from . import gc
-from . import gsattrack
+from .gsattrack import gsattrack
 from .version import __version__

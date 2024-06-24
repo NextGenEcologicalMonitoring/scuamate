@@ -8,12 +8,12 @@ import csv
 import logging
 import os
 
-from scuamate import (get_request,
-                      get_prev_utc_datetime,
-                      get_dotenv_vals,
-                      InvalidPointsError,
-                      GetRequestError,
-                     )
+from scuamate.core import (get_request,
+                           get_prev_utc_datetime,
+                           get_dotenv_vals,
+                           InvalidPointsError,
+                           GetRequestError,
+                          )
 from scuamate.az.keyvault import get_secret, KeyVaultError
 
 ##########

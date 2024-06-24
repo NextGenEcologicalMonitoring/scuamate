@@ -4,7 +4,7 @@ import json
 from firebase_admin import credentials, initialize_app, firestore
 
 from scuamate import get_dotenv_vals
-from scuamate.az.kevault import get_secret
+from scuamate.az.keyvault import get_secret
 
 
 def get_access_info(dotenv_filename,
