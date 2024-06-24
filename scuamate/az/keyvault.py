@@ -4,6 +4,8 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 import requests
 
+from ..core import get_dotenv_vals as _get_dotenv_vals
+
 
 ############
 # CLASS DEFS
@@ -27,7 +29,7 @@ def get_vault_name(dotenv_filename):
     '''
     get an Azure secrets vault name from the given dotenv file
     '''
-    vault_name = get_dotenv_vals(dotenv_filename, ['VAULT_NAME'])
+    vault_name = _get_dotenv_vals(dotenv_filename, ['VAULT_NAME'])
     return vault_name
 
 
@@ -45,6 +47,6 @@ def get_secret(vault_name, secret_name):
         secret = client.get_secret(secret_name).value
     # or log authentication/connection/etc error
     except Exception as e:
-        raise SecretsVaultError(e)
+        raise KeyVaultError(e)
     return secret
 

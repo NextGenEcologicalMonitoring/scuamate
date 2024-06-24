@@ -8,13 +8,13 @@ import csv
 import logging
 import os
 
-from scuamate.core import (get_request,
-                           get_prev_utc_datetime,
-                           get_dotenv_vals,
-                           InvalidPointsError,
-                           GetRequestError,
-                          )
-from scuamate.az.keyvault import get_secret, KeyVaultError
+from ..core import get_prev_utc_datetime as _get_prev_utc_datetime
+from ..core import get_dotenv_vals as _get_dotenv_vals
+from ..core import get_request as _get_request
+from ..core import GetRequestError as GetRequestError
+from ..core import InvalidPointsError as InvalidPointsError
+from .. import az as _az
+
 
 ##########
 # FN DEFS:
@@ -32,7 +32,7 @@ def get_formatted_prev_utc_time(**kwargs):
     get a properly formatted timestamp for some amount of time ago
     (using kwargs fed to `datetime.datetime.timedelta`),
     '''
-    dt = get_prev_utc_datetime(**kwargs)
+    dt = _get_prev_utc_datetime(**kwargs)
     assert isinstance(dt, datetime)
     return format_datetime(dt)
 
@@ -45,7 +45,7 @@ def get_token(username, pwd):
     headers = {'Accept': 'application/json',
                'Authorization': 'Basic',
               }
-    response = get_request(request_url,
+    response = _get_request(request_url,
                            headers=headers,
                            auth=(username, pwd),
                           )
@@ -70,15 +70,15 @@ def get_access_info(dotenv_filename,
     '''
     (username,
      secret_name,
-     guid) = get_dotenv_vals(dotenv_filename,
+     guid) = _get_dotenv_vals(dotenv_filename,
                              [username_dotenv_val,
                               secretname_dotenv_val,
                               accountname_dotenv_val,
                              ],
                             )
     try:
-        pwd = get_secret(azure_vault_name, secret_name)
-    except KeyVaultError as e:
+        pwd = _az.keyvault.get_secret(azure_vault_name, secret_name)
+    except _az.keyvault.KeyVaultError as e:
         logging.critical(e.message)
     # authorize with GSatTrack to get JSON Web Token (JWT)
     try:
@@ -104,7 +104,7 @@ def get_all_assets(gst_client_id, jwt):
     headers = {'Authorization': f'Bearer {jwt}',
               }
     # get and parse response
-    response = get_request(request_url,
+    response = _get_request(request_url,
                            headers=headers,
                           )
     assets_df = pd.DataFrame(response.json())
@@ -168,7 +168,7 @@ def get_points(jwt,
         page_num_provided = False
         page_num = 1
     print(f'\t\tgetting page {page_num} of results...')
-    response = get_request(request_url+f'&page={page_num}',
+    response = _get_request(request_url+f'&page={page_num}',
                            headers=headers,
                            **request_kwargs,
                           )
@@ -182,7 +182,7 @@ def get_points(jwt,
         while page < last_page:
             page_num += 1
             print(f'\t\tgetting page {page_num} of results...')
-            response = get_request(request_url+f'&page={page_num}',
+            response = _get_request(request_url+f'&page={page_num}',
                                    headers=headers,
                                   )
             page = response.json()['page']

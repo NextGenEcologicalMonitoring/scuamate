@@ -8,9 +8,10 @@ import pyodbc
 import re
 import os
 
-from scuamate import get_dotenv_vals, InvalidPointsError, get_prev_utc_datetime
-from scuamate.az.keyvault import get_secret
-
+from ..core import get_prev_utc_datetime as _get_prev_utc_datetime
+from ..core import get_dotenv_vals as _get_dotenv_vals
+from ..core import InvalidPointsError as InvalidPointsError
+from .. import az as _az
 
 ##########
 # FN DEFS:
@@ -20,7 +21,7 @@ def get_formatted_prev_utc_time(**kwargs):
     get a properly formatted timestamp for some amount of time ago
     (using kwargs fed to `datetime.datetime.timedelta`),
     '''
-    dt = get_prev_utc_datetime(**kwargs)
+    dt = _get_prev_utc_datetime(**kwargs)
     assert isinstance(dt, datetime)
     return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -64,14 +65,14 @@ def get_access_info(dotenv_filename,
      server_name,
      db_name,
      db_uid,
-    ) = get_dotenv_vals(dotenv_filename,
+    ) = _get_dotenv_vals(dotenv_filename,
                         [secretname_dotenv_val,
                          servername_dotenv_val,
                          dbname_dotenv_val,
                          username_dotenv_val,
                         ],
                        )
-    pwd = get_secret(azure_vault_name, secret_name)
+    pwd = _az.keyvault.get_secret(azure_vault_name, secret_name)
     # prep SQL connection info
     acc_info = prep_conn_info_dict(server_name,
                                    db_name,

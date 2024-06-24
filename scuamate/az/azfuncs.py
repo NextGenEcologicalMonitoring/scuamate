@@ -12,7 +12,7 @@ def make_httpresponse(successful, message=None):
                 False: 500,
                }
     status = statuses[successful]
-    response = HttpResponse(body=message,
+    response = scuamate.az.functions.HttpResponse(body=message,
                             status_code=status,
                            )
     return response

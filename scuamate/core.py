@@ -124,7 +124,7 @@ def get_dotenv_vals(dotenv_filename, keys_list):
     # grab all info from the .env config file
     config = dotenv_values(dotenv_filename)
     # extract and return requested vals
-    vals = [config[key] for key  in keys_list]
+    vals = [config[key] for key in keys_list]
     # same number of keys as vals?
     assert len(vals) == len(keys_list)
     # all strings?

@@ -3,9 +3,8 @@
 import json
 from firebase_admin import credentials, initialize_app, firestore
 
-from scuamate import get_dotenv_vals
-from scuamate.az.keyvault import get_secret
-
+from ..core import get_dotenv_vals as _get_dotenv_vals
+from .. import az as _az
 
 def get_access_info(dotenv_filename,
                     dburl_dotenv_val,
@@ -21,14 +20,14 @@ def get_access_info(dotenv_filename,
     needed for access to the Firestore database
     (the Firebase access key and the database URL)
     '''
-    key_name, db_url = get_dotenv_vals(dotenv_filename,
+    key_name, db_url = _get_dotenv_vals(dotenv_filename,
                                        [secretname_dotenv_val,
                                         dburl_dotenv_val,
                                        ],
                                       )
-    key = get_secret(vault_name, key)
+    key_json = _az.keyvault.get_secret(azure_vault_name, key_name)
     # prep connection info
-    acc_info = {'firebaseKey' : json_key,
+    acc_info = {'firebaseKey' : key_json,
                 'databaseURL': db_url,
                }
     return acc_info
@@ -54,7 +53,7 @@ def connect_to_db(acc_info):
     returning both the app and database-client objects
     '''
     cert = get_cert(acc_info.pop('firebaseKey'))
-    app = firebase_admin.initialize_app(cert, acc_info)
+    app = initialize_app(cert, acc_info)
     db = firestore.client()
     return (app, db)
 
