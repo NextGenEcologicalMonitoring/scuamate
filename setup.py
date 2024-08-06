@@ -1,21 +1,30 @@
 import setuptools
 import re
+import os
 
 def readme():
     with open("README.md", 'r') as f:
         return f.read()
 
-# version-handling code stolen from: https://stackoverflow.com/questions/
-    #458550/standard-way-to-embed-version-into-python-package
-VERSIONFILE="scuamate/version.py"
-verstrline = open(VERSIONFILE, "rt").read()
+# version-handling code stolen from: https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
+VERSION_FILE="scuamate/version.py"
+verstrline = open(VERSION_FILE, "rt").read()
 VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
 mo = re.search(VSRE, verstrline, re.M)
 if mo:
     verstr = mo.group(1)
 else:
-    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+    raise RuntimeError("Unable to find version string in %s." % (VERSION_FILE,))
 
+# requirements-handling code stolen from: https://stackoverflow.com/questions/26900328/install-dependencies-from-setup-py
+REQUIREMENTS_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'requirements.txt')
+install_requires = []
+if os.path.isfile(REQUIREMENTS_FILE):
+    with open(REQUIREMENTS_FILE) as f:
+        install_requires = f.read().splitlines()
+
+# call the setup function
 setuptools.setup(
     name='scuamate',
     # version num.: MAJOR.MINOR.PATCH
@@ -51,5 +60,6 @@ setuptools.setup(
     project_urls={
         'Source': 'https://github.com/NextGenEcologicalMonitoring/scuamate',
     },
+    install_requires=install_requires,
     python_requires='>=3.9',
 )

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import pyodbc
+import pprint
 import re
 import os
 
@@ -184,6 +185,7 @@ def insert_vals_into_tbl(data,
                          tbl_name,
                          cursor,
                          field_names=None,
+                         output_field=None,
                          debug=False,
                         ):
     '''
@@ -200,6 +202,11 @@ def insert_vals_into_tbl(data,
 
     It is assumed that SQL field names match the column names in the table, so
     if they do not then provide the SQL field names to the 'field_names' arg as a list.
+
+    The post-insert value of a field (e.g., and auto-incremented primary key)
+    can be returned using the OUTPUT statment, if desired, by setting
+    output_field to the name of the field whose value should be output.
+    Otherwise nothing is output.
     '''
     # prep the values to be inserted
     if isinstance(data, dict):
@@ -209,6 +216,12 @@ def insert_vals_into_tbl(data,
     # grab the field names
     if field_names is None:
         field_names = [*data.columns]
+    # set up the output statement and output data structure, if requested
+    if output_field is not None:
+        output_str = f' OUTPUT INSERTED.{output_field} '
+        output_vals = []
+    else:
+        output_str = ''
     # iterate over the devices df and insert each row into the devices table
     insert_ct = 0
     for i, row in data.iterrows():
@@ -225,18 +238,32 @@ def insert_vals_into_tbl(data,
                     vals.append(f"'{str(val).split('+')[0].replace(' ', 'T')}'")
                 else:
                     vals.append(f"'{val}'")
+            # NOTE: bools must be expressed as '0'|'1' (for BIT field);
+            #       otherwise throws an error
+            elif isinstance(val, bool):
+                vals.append(str(int(val)))
             else:
                 vals.append(f"{val}")
+        # format the full INSERT command
         insert_cmd = """
-            INSERT INTO {} ({}) VALUES ({})
+            INSERT INTO {} ({}){}VALUES ({})
             """.format(tbl_name,
                        ", ".join(field_names),
+                       output_str,
                        ", ".join(vals))
-        cursor.execute(insert_cmd)
+        res = cursor.execute(insert_cmd)
         insert_ct += 1
+        if output_field is not None:
+            output_val = res.fetchall()
+            assert len(output_val) == 1
+            output_vals.append(output_val[0])
     if debug:
         print((f"\t\tinserted {insert_ct} row{'s' * (len(data)>1)} into {tbl_name}; "
                'check results, then commit'))
+    if output_field is not None:
+        return output_vals
+    else:
+        return
 
 
 def write_schema_dbml(conn_info,
